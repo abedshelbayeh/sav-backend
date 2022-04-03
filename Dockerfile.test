@@ -1,0 +1,12 @@
+FROM node:lts-alpine
+WORKDIR /app
+
+# Install all dependencies
+COPY package*.json ./
+RUN npm install
+
+# Environment variables
+ENV DATABASE_HOST localhost
+ENV DATABASE_PORT 3306
+ENV DATABASE_USER root
+ENV DATABASE_PASSWORD password

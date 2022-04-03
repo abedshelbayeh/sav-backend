@@ -1,0 +1,13 @@
+name: ci
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: "docker build -t us.gcr.io/${{ github.event.repository.name }}/test:$GITHUB_SHA -f Dockerfile.test ."
+      - run: "docker run -v /app/node_modules -v $(pwd):/app us.gcr.io/${{ github.event.repository.name }}/test:$GITHUB_SHA npm run lint"
+      - run: "docker run -v /app/node_modules -v $(pwd):/app us.gcr.io/${{ github.event.repository.name }}/test:$GITHUB_SHA npm run test"

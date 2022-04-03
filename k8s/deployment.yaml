@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sav-backend
+  labels:
+    app: sav-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sav-backend
+  template:
+    metadata:
+      labels:
+        app: sav-backend
+    spec:
+      containers:
+        - name: sav-backend
+          image: us.gcr.io/p-savvy/sav-backend
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: mysql
