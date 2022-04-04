@@ -23,8 +23,7 @@ const get = async (filter, limit, skip) => {
 
 	return {
 		rows,
-		count,
-		test: "2"
+		count
 	}
 }
 
