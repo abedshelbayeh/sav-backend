@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/project-savvy/sav-backend/compare/v0.1.1...v0.2.0) (2022-04-10)
+
+
+### Features
+
+* Support people/list endpoint with no pagination ([646152b](https://github.com/project-savvy/sav-backend/commit/646152b6a2dddd885225746dc8c10e6ff0e20b0d))
+
 ### [0.1.1](https://github.com/project-savvy/sav-backend/compare/v0.1.0...v0.1.1) (2022-04-04)
 
 
