@@ -6,7 +6,12 @@ const get = async (filter, limit, skip) => {
 		q = q.where("name", "like", `%${filter}%`)
 	}
 
-	const [rowsCount = [], rows = []] = await Promise.all([q.clone().count(), q.select().offset(skip).limit(limit)])
+	const qc = q.clone()
+	if (limit > 0) {
+		q = q.offset(skip).limit(limit)
+	}
+
+	const [rowsCount = [], rows = []] = await Promise.all([qc.count(), q.select()])
 	const [{ "count(*)": count } = {}] = rowsCount
 
 	return {
