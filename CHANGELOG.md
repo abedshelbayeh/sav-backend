@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.3.1](https://github.com/project-savvy/sav-backend/compare/v0.3.0...v0.3.1) (2022-04-24)
+
+
+### Bug Fixes
+
+* Added firebase secrets ([616c881](https://github.com/project-savvy/sav-backend/commit/616c8816261991b14312ef17e62c6f50d3bdf508))
+
 ## [0.3.0](https://github.com/project-savvy/sav-backend/compare/v0.2.0...v0.3.0) (2022-04-24)
 
 
