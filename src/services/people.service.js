@@ -1,9 +1,13 @@
 const knex = require("../interfaces/mysql")
 
-const get = async (filter, limit, skip) => {
-	let q = knex("users").orderBy("name", "asc")
+const list = async (_clientId, emailAddress, filter, limit, skip) => {
+	let q = knex("users").where("_clientId", _clientId).orderBy("name", "asc")
 	if (filter) {
 		q = q.where("name", "like", `%${filter}%`)
+	}
+
+	if (emailAddress) {
+		q = q.where("email", "=", emailAddress)
 	}
 
 	const qc = q.clone()
@@ -21,5 +25,5 @@ const get = async (filter, limit, skip) => {
 }
 
 module.exports = {
-	get
+	list
 }

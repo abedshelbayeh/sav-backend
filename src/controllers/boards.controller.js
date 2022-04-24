@@ -1,47 +1,65 @@
 const httpStatus = require("http-status")
 const catchAsync = require("../utils/catchAsync")
-const { boardsService } = require("../services")
+const { boards } = require("../services")
 
-const get = catchAsync(async (req, res) => {
+const list = catchAsync(async (req, res) => {
+	const { _clientId } = req.user
 	const { filter, limit = Infinity, skip = 0 } = req.query
-	const boards = await boardsService.get(filter, limit, skip)
-	res.status(httpStatus.OK).send(boards)
+
+	const result = await boards.list(_clientId, filter, limit, skip)
+
+	res.status(httpStatus.OK).send(result)
 })
 
-const getBoard = catchAsync(async (req, res) => {
+const getById = catchAsync(async (req, res) => {
+	const { _clientId } = req.user
 	const { boardId } = req.params
-	const boards = await boardsService.getBoard(boardId)
-	res.status(httpStatus.OK).send(boards)
+
+	const result = await boards.getById(_clientId, boardId)
+
+	res.status(httpStatus.OK).send(result)
 })
 
-const del = catchAsync(async (req, res) => {
+const deleteById = catchAsync(async (req, res) => {
+	const { _clientId } = req.user
 	const { boardId } = req.params
-	const affectedRows = await boardsService.del(boardId)
-	res.status(httpStatus.OK).send(affectedRows)
+
+	const result = await boards.deleteById(_clientId, boardId)
+
+	res.status(httpStatus.OK).send(result)
 })
 
 const upsert = catchAsync(async (req, res) => {
+	const { _clientId } = req.user
+
 	const payload = req.body
-	const boards = await boardsService.upsert(payload)
-	res.status(httpStatus.OK).send(boards)
+	const result = await boards.upsert(_clientId, payload)
+
+	res.status(httpStatus.OK).send(result)
 })
 
-const getTemplates = catchAsync(async (req, res) => {
-	const templates = await boardsService.getTemplates()
+const listTemplates = catchAsync(async (req, res) => {
+	const { _clientId } = req.user
+
+	const templates = await boards.listTemplates(_clientId)
+
 	res.status(httpStatus.OK).send(templates)
 })
 
-const getTemplate = catchAsync(async (req, res) => {
+const getTemplateById = catchAsync(async (req, res) => {
+	const { _clientId } = req.user
 	const { templateId } = req.params
-	const templates = await boardsService.getTemplate(templateId)
+
+	const templates = await boards.getTemplateById(_clientId, templateId)
+
 	res.status(httpStatus.OK).send(templates)
 })
 
 module.exports = {
-	get,
-	getBoard,
-	del,
+	list,
+	getById,
+	deleteById,
 	upsert,
-	getTemplates,
-	getTemplate
+	listTemplates,
+	getTemplateById
 }

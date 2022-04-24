@@ -1,2 +1,5 @@
-module.exports.peopleController = require("./people.controller")
-module.exports.boardsController = require("./boards.controller")
+module.exports.people = require("./people.controller")
+module.exports.boards = require("./boards.controller")
+module.exports.clients = require("./clients.controller")
+module.exports.authentication = require("./authentication.controller")
+module.exports.fake = require("./fake.controller")

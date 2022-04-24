@@ -11,7 +11,8 @@ const envVarsSchema = Joi.object()
 		DATABASE_HOST: Joi.string().required(),
 		DATABASE_PORT: Joi.number().required(),
 		DATABASE_USER: Joi.string().required(),
-		DATABASE_PASSWORD: Joi.string().required()
+		DATABASE_PASSWORD: Joi.string().required(),
+		FIREBASE_CERT: Joi.string().required()
 	})
 	.unknown()
 
@@ -29,5 +30,8 @@ module.exports = {
 		port: envVars.DATABASE_PORT,
 		user: envVars.DATABASE_USER,
 		password: envVars.DATABASE_PASSWORD
+	},
+	firebase: {
+		cert: JSON.parse(envVars.FIREBASE_CERT)
 	}
 }

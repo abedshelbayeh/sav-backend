@@ -1,14 +1,15 @@
-const express = require("express")
-const helmet = require("helmet")
-const xss = require("xss-clean")
 const compression = require("compression")
 const cors = require("cors")
+const express = require("express")
+const helmet = require("helmet")
 const httpStatus = require("http-status")
+const xss = require("xss-clean")
+
+const { errorConverter, errorHandler } = require("./middlewares/error")
+const ApiError = require("./utils/ApiError")
 const config = require("./config/config")
 const morgan = require("./config/morgan")
 const routes = require("./routes/v1")
-const { errorConverter, errorHandler } = require("./middlewares/error")
-const ApiError = require("./utils/ApiError")
 
 const app = express()
 
@@ -22,9 +23,6 @@ app.use(helmet())
 
 // parse json request body
 app.use(express.json())
-
-// parse urlencoded request body
-app.use(express.urlencoded({ extended: true }))
 
 // sanitize request data
 app.use(xss())

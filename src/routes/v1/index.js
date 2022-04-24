@@ -1,37 +1,59 @@
 const express = require("express")
-const peopleRoute = require("./people.route")
-const boardsRoute = require("./boards.route")
-const docsRoute = require("./docs.route")
+
+const authneticationRoute = require("./authentication.routes")
+const clientsRoute = require("./clients.routes")
+const peopleRoute = require("./people.routes")
+const boardsRoute = require("./boards.routes")
+const docsRoute = require("./docs.routes")
+const fakeRoute = require("./fake.routes")
+
 const config = require("../../config/config")
+
+const auth = require("../../middlewares/auth")
 
 const router = express.Router()
 
-const defaultRoutes = [
+const prodRoutes = [
 	{
 		path: "/people",
-		route: peopleRoute
+		route: peopleRoute,
+		requiredRoles: []
 	},
 	{
 		path: "/boards",
-		route: boardsRoute
+		route: boardsRoute,
+		requiredRoles: []
+	},
+	{
+		path: "/clients",
+		route: clientsRoute,
+		requiredRoles: ["SAV-OPS"]
+	},
+	{
+		path: "/authentication",
+		route: authneticationRoute,
+		requiredRoles: []
 	}
 ]
 
+prodRoutes.forEach(({ path, route, requiredRoles }) => {
+	router.use(path, auth(requiredRoles), route)
+})
+
 const devRoutes = [
-	// routes available only in development mode
 	{
 		path: "/docs",
 		route: docsRoute
+	},
+	{
+		path: "/fake",
+		route: fakeRoute
 	}
 ]
 
-defaultRoutes.forEach((route) => {
-	router.use(route.path, route.route)
-})
-
 if (config.env === "development") {
-	devRoutes.forEach((route) => {
-		router.use(route.path, route.route)
+	devRoutes.forEach(({ path, route }) => {
+		router.use(path, route)
 	})
 }
 

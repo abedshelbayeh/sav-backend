@@ -1,9 +1,10 @@
-const { v4: uuid } = require("uuid")
+const { nanoid } = require("nanoid")
 const knex = require("../interfaces/mysql")
 
-const get = async (filter, limit, skip) => {
-	let qc = knex("boards")
+const list = async (_clientId, filter, limit, skip) => {
+	let qc = knex("boards").where("boards._clientId", _clientId)
 	let qd = knex("boards")
+		.where("boards._clientId", _clientId)
 		.leftJoin("templates", "boards.templateId", "templates.id")
 		.leftJoin("participants", "boards.id", "participants.boardId")
 		.groupBy("boards.id")
@@ -27,52 +28,55 @@ const get = async (filter, limit, skip) => {
 	}
 }
 
-const getBoard = async (boardId) => {
+const getById = async (_clientId, boardId) => {
 	const rows = await knex
 		.select(["participants.*", "templates.*", "boards.*"])
 		.from("boards")
 		.leftJoin("participants", "boards.id", "participants.boardId")
 		.leftJoin("templates", "boards.templateId", "templates.id")
+		.where("boards._clientId", _clientId)
 		.where("boards.id", boardId)
 
 	return {
-		rows,
-		count: rows.length
+		rows
 	}
 }
 
-const del = async (boardId) => {
-	const affectedRows = await knex("boards").where("id", boardId).del()
+const deleteById = async (_clientId, boardId) => {
+	const rows = await knex("boards").where("_clientId", _clientId).where("id", boardId).del()
 
 	return {
-		affectedRows
+		rows
 	}
 }
 
-const upsert = async ({ id, name, participants, ...rest }) => {
-	const boardId = id || uuid()
+const upsert = async (_clientId, { id, name, participants, ...rest }) => {
+	const boardId = id || nanoid()
 
 	let generatedName
 	if (!id) {
 		generatedName = `Untitled Board ${new Date().toLocaleDateString()}`
-		const existingBoards = await knex("boards").where("name", "like", `%${generatedName}%`).select()
+		const existingBoards = await knex
+			.select()
+			.from("boards")
+			.where("_clientId", _clientId)
+			.where("name", "like", `%${generatedName}%`)
 		generatedName = existingBoards.length ? `${generatedName} #${existingBoards.length + 1}` : generatedName
 	}
 
-	let added = []
-	let deleted = []
+	let addedParticipants = []
+	let deletedParticipants = []
 	if (participants) {
 		const desiredParticipants = participants.reduce(
 			(a, desiredParticipantId) => ({ ...a, [desiredParticipantId]: true }),
 			{}
 		)
-		const existingParticipants = (await knex("participants").select().where("boardId", boardId)).reduce(
-			(a, { userId: existingParticipantId }) => ({ ...a, [existingParticipantId]: true }),
-			{}
-		)
+		const existingParticipants = (
+			await knex.select().from("participants").where("_clientId", _clientId).where("boardId", boardId)
+		).reduce((a, { userId: existingParticipantId }) => ({ ...a, [existingParticipantId]: true }), {})
 
-		added = participants.filter((participantId) => !existingParticipants[participantId])
-		deleted = Object.keys(existingParticipants).filter(
+		addedParticipants = participants.filter((participantId) => !existingParticipants[participantId])
+		deletedParticipants = Object.keys(existingParticipants).filter(
 			(existingParticipantId) => !desiredParticipants[existingParticipantId]
 		)
 	}
@@ -80,18 +84,21 @@ const upsert = async ({ id, name, participants, ...rest }) => {
 	await knex.transaction(async (trx) => {
 		if (id) {
 			await trx("boards")
+				.where("_clientId", _clientId)
 				.where("id", id)
 				.update({ ...rest, name })
 		} else {
-			await trx("boards").insert({ ...rest, id: boardId, name: generatedName })
+			await trx("boards").insert({ ...rest, id: boardId, name: generatedName, _clientId })
 		}
 
-		if (added.length) {
-			await trx("participants").insert(added.map((participantId) => ({ id: uuid(), boardId, userId: participantId })))
+		if (addedParticipants.length) {
+			await trx("participants").insert(
+				addedParticipants.map((participantId) => ({ id: nanoid(), boardId, userId: participantId, _clientId }))
+			)
 		}
 
-		if (deleted.length) {
-			await trx("participants").whereIn("userId", deleted).del()
+		if (deletedParticipants.length) {
+			await trx("participants").whereIn("userId", deletedParticipants).where("_clientId", _clientId).del()
 		}
 	})
 
@@ -104,16 +111,16 @@ const upsert = async ({ id, name, participants, ...rest }) => {
 	}
 }
 
-const getTemplates = async () => {
-	const rows = await knex("templates").select()
+const listTemplates = async () => {
+	const rows = await knex.select().from("templates")
 
 	return {
 		rows
 	}
 }
 
-const getTemplate = async (templateId) => {
-	const rows = await knex("templates").where("id", templateId).select()
+const getTemplateById = async (templateId) => {
+	const rows = await knex.select().from("templates").where("id", templateId)
 
 	return {
 		rows
@@ -121,10 +128,10 @@ const getTemplate = async (templateId) => {
 }
 
 module.exports = {
-	get,
-	getBoard,
-	del,
+	list,
+	getById,
+	deleteById,
 	upsert,
-	getTemplates,
-	getTemplate
+	listTemplates,
+	getTemplateById
 }
