@@ -1,6 +1,6 @@
 {
 	"name": "sav-backend",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Backend service exposing RESTful APIs to the app",
 	"main": "src/index.js",
 	"repository": "https://github.com/project-savvy/sav-backend.git",
